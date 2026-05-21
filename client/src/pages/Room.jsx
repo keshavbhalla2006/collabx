@@ -21,7 +21,13 @@ const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap');
 
   * { box-sizing: border-box; }
-
+  #root {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  border: none !important;
+  text-align: left !important;
+}
   .room-root {
     display: flex;
     flex-direction: column;
