@@ -2,50 +2,218 @@ import { useState, useEffect, useRef } from 'react';
 import { FiSend } from 'react-icons/fi';
 import { roomAPI } from '../services/api';
 
+const CHAT_STYLES = `
+  .cp-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #090c11;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .cp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.85rem;
+    background: rgba(8,11,15,0.8);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+  }
+
+  .cp-title {
+    color: #d4af37;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .cp-count {
+    color: #2e3540;
+    font-size: 0.67rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .cp-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .cp-empty {
+    color: #2e3540;
+    font-size: 0.78rem;
+    text-align: center;
+    margin-top: 2.5rem;
+    line-height: 1.8;
+    letter-spacing: 0.03em;
+  }
+
+  .cp-msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.45rem;
+  }
+
+  .cp-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #141a24, #1e2535);
+    border: 1.5px solid rgba(212,175,55,0.25);
+    color: #d4af37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    letter-spacing: 0;
+  }
+
+  .cp-avatar.self {
+    background: linear-gradient(135deg, #1a1f2e, #252d40);
+    border-color: rgba(212,175,55,0.4);
+  }
+
+  .cp-sender-name {
+    color: #3a4250;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 0 0 0.2rem 0.2rem;
+  }
+
+  .cp-bubble {
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    max-width: 100%;
+  }
+
+  .cp-bubble.them {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-bottom-left-radius: 3px;
+  }
+
+  .cp-bubble.me {
+    background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.07));
+    border: 1px solid rgba(212,175,55,0.2);
+    border-bottom-right-radius: 3px;
+  }
+
+  .cp-msg-text {
+    color: #c8cdd4;
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.55;
+    word-break: break-word;
+    white-space: pre-wrap;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .cp-time {
+    color: #232b36;
+    font-size: 0.62rem;
+    margin: 0.15rem 0.2rem 0;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Input */
+  .cp-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.45rem;
+    padding: 0.65rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(8,11,15,0.6);
+    flex-shrink: 0;
+  }
+
+  .cp-textarea {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 8px;
+    color: #c8cdd4;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    font-family: 'Syne', sans-serif;
+    resize: none;
+    outline: none;
+    line-height: 1.5;
+    max-height: 80px;
+    overflow-y: auto;
+    transition: border-color 0.2s;
+  }
+
+  .cp-textarea::placeholder { color: #2e3540; }
+
+  .cp-textarea:focus {
+    border-color: rgba(212,175,55,0.3);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .cp-send-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.08));
+    border: 1px solid rgba(212,175,55,0.35);
+    color: #d4af37;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .cp-send-btn:hover:not(:disabled) {
+    background: rgba(212,175,55,0.22);
+    border-color: rgba(212,175,55,0.6);
+    box-shadow: 0 0 12px rgba(212,175,55,0.15);
+  }
+
+  .cp-send-btn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+`;
+
 export default function ChatPanel({ socket, roomId, user }) {
   const [messages, setMessages] = useState([]);
-  const [input, setInput]       = useState('');
-  const bottomRef               = useRef(null);
-  const loadedRef               = useRef(false);
+  const [input, setInput] = useState('');
+  const bottomRef = useRef(null);
+  const loadedRef = useRef(false);
 
-  // Load chat history once on mount
   useEffect(() => {
     if (!roomId || loadedRef.current) return;
     loadedRef.current = true;
-
-    const loadHistory = async () => {
+    const load = async () => {
       try {
         const res = await roomAPI.getMessages(roomId);
-        if (res.data.messages) {
-          setMessages(res.data.messages);
-        }
-      } catch (err) {
-        console.error('Failed to load chat history:', err);
-      }
+        if (res.data.messages) setMessages(res.data.messages);
+      } catch {}
     };
-    loadHistory();
+    load();
   }, [roomId]);
 
-  // Socket listener — only one, never duplicated
   useEffect(() => {
     if (!socket) return;
-
     const handleMessage = (msg) => {
       setMessages((prev) => {
-        // Prevent duplicate messages
-        const isDuplicate = prev.some(
-          (m) => m.timestamp === msg.timestamp && m.senderId === msg.senderId
-        );
-        if (isDuplicate) return prev;
-        return [...prev, msg];
+        const isDup = prev.some(m => m.timestamp === msg.timestamp && m.senderId === msg.senderId);
+        return isDup ? prev : [...prev, msg];
       });
     };
-
     socket.on('chat-message', handleMessage);
     return () => socket.off('chat-message', handleMessage);
   }, [socket]);
 
-  // Auto scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -57,429 +225,67 @@ export default function ChatPanel({ socket, roomId, user }) {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   const formatTime = (iso) => {
-    try {
-      return new Date(iso).toLocaleTimeString([], {
-        hour: '2-digit', minute: '2-digit',
-      });
-    } catch { return ''; }
+    try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+    catch { return ''; }
   };
 
   return (
-    <div style={s.panel}>
-      <div style={s.header}>
-        <span style={s.title}>Chat</span>
-        <span style={s.count}>{messages.length} messages</span>
-      </div>
+    <>
+      <style>{CHAT_STYLES}</style>
+      <div className="cp-panel">
+        <div className="cp-header">
+          <span className="cp-title">Messages</span>
+          <span className="cp-count">{messages.length}</span>
+        </div>
 
-      <div style={s.messages}>
-        {messages.length === 0 && (
-          <p style={s.empty}>No messages yet. Say hello!</p>
-        )}
-        {messages.map((msg, i) => {
-          const isMe = msg.senderId === user?.id;
-          return (
-            <div key={i} style={{ ...s.msgRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-              {!isMe && (
-                <div style={s.avatar}>
-                  {msg.senderName?.[0]?.toUpperCase()}
+        <div className="cp-messages">
+          {messages.length === 0 && (
+            <p className="cp-empty">No messages yet.<br />Start the conversation.</p>
+          )}
+          {messages.map((msg, i) => {
+            const isMe = msg.senderId === user?.id;
+            return (
+              <div key={i} className="cp-msg-row" style={{ justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                {!isMe && <div className="cp-avatar">{msg.senderName?.[0]?.toUpperCase()}</div>}
+                <div style={{ maxWidth: '82%' }}>
+                  {!isMe && <p className="cp-sender-name">{msg.senderName}</p>}
+                  <div className={`cp-bubble ${isMe ? 'me' : 'them'}`}>
+                    <p className="cp-msg-text">{msg.message}</p>
+                  </div>
+                  <p className="cp-time" style={{ textAlign: isMe ? 'right' : 'left' }}>
+                    {formatTime(msg.timestamp)}
+                  </p>
                 </div>
-              )}
-              <div style={{ maxWidth: '75%' }}>
-                {!isMe && <p style={s.senderName}>{msg.senderName}</p>}
-                <div style={{
-                  ...s.bubble,
-                  background:   isMe ? '#6c63ff' : '#2d2d4e',
-                  borderRadius: isMe ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                }}>
-                  <p style={s.msgText}>{msg.message}</p>
-                </div>
-                <p style={{ ...s.time, textAlign: isMe ? 'right' : 'left' }}>
-                  {formatTime(msg.timestamp)}
-                </p>
+                {isMe && <div className="cp-avatar self">{user?.name?.[0]?.toUpperCase()}</div>}
               </div>
-              {isMe && (
-                <div style={{ ...s.avatar, background: '#4c1d95' }}>
-                  {user?.name?.[0]?.toUpperCase()}
-                </div>
-              )}
-            </div>
-          );
-        })}
-        <div ref={bottomRef} />
-      </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
 
-      <div style={s.inputRow}>
-        <textarea
-          style={s.input}
-          placeholder="Type a message... (Enter to send)"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          rows={1}
-          spellCheck={false}
-        />
-        <button
-          style={{ ...s.sendBtn, opacity: input.trim() ? 1 : 0.4 }}
-          onClick={sendMessage}
-          disabled={!input.trim()}
-        >
-          <FiSend size={16} />
-        </button>
+        <div className="cp-input-row">
+          <textarea
+            className="cp-textarea"
+            placeholder="Message... (↵ to send)"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            spellCheck={false}
+          />
+          <button
+            className="cp-send-btn"
+            onClick={sendMessage}
+            disabled={!input.trim()}
+          >
+            <FiSend size={14} />
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
-
-const s = {
-  panel:      { display: 'flex', flexDirection: 'column', height: '100%', background: '#13131f', fontFamily: 'sans-serif' },
-  header:     { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.75rem', background: '#1a1a2e', borderBottom: '1px solid #2d2d4e', flexShrink: 0 },
-  title:      { color: '#a78bfa', fontSize: '0.82rem', fontWeight: '600' },
-  count:      { color: '#4b5563', fontSize: '0.72rem' },
-  messages:   { flex: 1, overflowY: 'auto', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' },
-  empty:      { color: '#4b5563', fontSize: '0.82rem', textAlign: 'center', marginTop: '2rem' },
-  msgRow:     { display: 'flex', alignItems: 'flex-end', gap: '0.4rem' },
-  avatar:     { width: 26, height: 26, borderRadius: '50%', background: '#374151', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: '600', flexShrink: 0 },
-  senderName: { color: '#9ca3af', fontSize: '0.7rem', margin: '0 0 0.2rem 0.2rem' },
-  bubble:     { padding: '0.5rem 0.75rem' },
-  msgText:    { color: '#f1f5f9', fontSize: '0.82rem', margin: 0, lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-wrap' },
-  time:       { color: '#4b5563', fontSize: '0.65rem', margin: '0.15rem 0.2rem 0' },
-  inputRow:   { display: 'flex', alignItems: 'flex-end', gap: '0.4rem', padding: '0.6rem', borderTop: '1px solid #2d2d4e', background: '#1a1a2e', flexShrink: 0 },
-  input:      { flex: 1, background: '#252540', border: '1px solid #374151', borderRadius: '8px', color: '#e2e8f0', padding: '0.5rem 0.75rem', fontSize: '0.82rem', resize: 'none', outline: 'none', fontFamily: 'sans-serif', lineHeight: 1.5, maxHeight: '80px', overflowY: 'auto' },
-  sendBtn:    { width: 34, height: 34, borderRadius: '8px', background: '#6c63ff', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-};
-
-
-
-// import { useState, useEffect, useRef } from 'react';
-// import { FiSend } from 'react-icons/fi';
-// import { roomAPI } from '../services/api';
-
-// export default function ChatPanel({
-//   socket,
-//   roomId,
-//   user,
-//   pendingMessages,
-//   onMessagesRead,
-// }) {
-//   const [messages, setMessages] = useState([]);
-//   const [input, setInput] = useState('');
-//   const bottomRef = useRef(null);
-
-//   // Load chat history when component mounts
-//   useEffect(() => {
-//     if (!roomId) return;
-
-//     const loadHistory = async () => {
-//       try {
-//         const res = await roomAPI.getMessages(roomId);
-//         setMessages(res.data.messages);
-//       } catch (err) {
-//         console.error('Failed to load chat history:', err);
-//       }
-//     };
-
-//     loadHistory();
-//   }, [roomId]);
-
-//   // // Listen for incoming real-time messages
-//   // useEffect(() => {
-//   //   if (!socket) return;
-
-//   //   socket.on('chat-message', (msg) => {
-//   //     setMessages((prev) => [...prev, msg]);
-//   //   });
-
-//   //   return () => socket.off('chat-message');
-//   // }, [socket]);
-//   // Merge pending messages coming from Room.jsx
-//   useEffect(() => {
-//     if (pendingMessages?.length > 0) {
-//       setMessages((prev) => {
-//         // Prevent duplicates
-//         const existingTimestamps = new Set(
-//           prev.map((m) => m.timestamp)
-//         );
-
-//         const newOnes = pendingMessages.filter(
-//           (m) => !existingTimestamps.has(m.timestamp)
-//         );
-
-//         return [...prev, ...newOnes];
-//       });
-
-//       // Tell parent messages were consumed
-//       onMessagesRead?.();
-//     }
-//   }, [pendingMessages, onMessagesRead]);
-
-//   // Auto-scroll to latest message
-//   useEffect(() => {
-//     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-//   }, [messages]);
-
-//   const sendMessage = () => {
-//     if (!input.trim()) return;
-
-//     socket?.emit('chat-message', {
-//       roomId,
-//       message: input.trim(),
-//     });
-
-//     setInput('');
-//   };
-
-//   const handleKeyDown = (e) => {
-//     // Send on Enter, new line on Shift+Enter
-//     if (e.key === 'Enter' && !e.shiftKey) {
-//       e.preventDefault();
-//       sendMessage();
-//     }
-//   };
-
-//   const formatTime = (iso) => {
-//     return new Date(iso).toLocaleTimeString([], {
-//       hour: '2-digit',
-//       minute: '2-digit',
-//     });
-//   };
-
-//   return (
-//     <div style={s.panel}>
-//       {/* Header */}
-//       <div style={s.header}>
-//         <span style={s.title}>Chat</span>
-//         <span style={s.count}>{messages.length} messages</span>
-//       </div>
-
-//       {/* Messages */}
-//       <div style={s.messages}>
-//         {messages.length === 0 && (
-//           <p style={s.empty}>
-//             No messages yet. Say hello!
-//           </p>
-//         )}
-
-//         {messages.map((msg, i) => {
-//           const isMe = msg.senderId === user?.id;
-
-//           return (
-//             <div
-//               key={i}
-//               style={{
-//                 ...s.msgRow,
-//                 justifyContent: isMe ? 'flex-end' : 'flex-start',
-//               }}
-//             >
-//               {/* Avatar for others */}
-//               {!isMe && (
-//                 <div style={s.avatar}>
-//                   {msg.senderName?.[0]?.toUpperCase()}
-//                 </div>
-//               )}
-
-//               <div style={{ maxWidth: '75%' }}>
-//                 {/* Sender name */}
-//                 {!isMe && (
-//                   <p style={s.senderName}>{msg.senderName}</p>
-//                 )}
-
-//                 <div
-//                   style={{
-//                     ...s.bubble,
-//                     background: isMe ? '#6c63ff' : '#2d2d4e',
-//                     borderRadius: isMe
-//                       ? '12px 12px 2px 12px'
-//                       : '12px 12px 12px 2px',
-//                   }}
-//                 >
-//                   <p style={s.msgText}>{msg.message}</p>
-//                 </div>
-
-//                 <p
-//                   style={{
-//                     ...s.time,
-//                     textAlign: isMe ? 'right' : 'left',
-//                   }}
-//                 >
-//                   {formatTime(msg.timestamp)}
-//                 </p>
-//               </div>
-
-//               {/* Avatar for self */}
-//               {isMe && (
-//                 <div style={{ ...s.avatar, background: '#4c1d95' }}>
-//                   {user?.name?.[0]?.toUpperCase()}
-//                 </div>
-//               )}
-//             </div>
-//           );
-//         })}
-
-//         <div ref={bottomRef} />
-//       </div>
-
-//       {/* Input */}
-//       <div style={s.inputRow}>
-//         <textarea
-//           style={s.input}
-//           placeholder="Type a message... (Enter to send)"
-//           value={input}
-//           onChange={(e) => setInput(e.target.value)}
-//           onKeyDown={handleKeyDown}
-//           rows={1}
-//           spellCheck={false}
-//         />
-
-//         <button
-//           style={{
-//             ...s.sendBtn,
-//             opacity: input.trim() ? 1 : 0.4,
-//           }}
-//           onClick={sendMessage}
-//           disabled={!input.trim()}
-//         >
-//           <FiSend size={16} />
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// const s = {
-//   panel: {
-//     display: 'flex',
-//     flexDirection: 'column',
-//     height: '100%',
-//     background: '#13131f',
-//     fontFamily: 'sans-serif',
-//   },
-
-//   header: {
-//     display: 'flex',
-//     alignItems: 'center',
-//     justifyContent: 'space-between',
-//     padding: '0.5rem 0.75rem',
-//     background: '#1a1a2e',
-//     borderBottom: '1px solid #2d2d4e',
-//     flexShrink: 0,
-//   },
-
-//   title: {
-//     color: '#a78bfa',
-//     fontSize: '0.82rem',
-//     fontWeight: '600',
-//   },
-
-//   count: {
-//     color: '#4b5563',
-//     fontSize: '0.72rem',
-//   },
-
-//   messages: {
-//     flex: 1,
-//     overflowY: 'auto',
-//     padding: '0.75rem',
-//     display: 'flex',
-//     flexDirection: 'column',
-//     gap: '0.6rem',
-//   },
-
-//   empty: {
-//     color: '#4b5563',
-//     fontSize: '0.82rem',
-//     textAlign: 'center',
-//     marginTop: '2rem',
-//   },
-
-//   msgRow: {
-//     display: 'flex',
-//     alignItems: 'flex-end',
-//     gap: '0.4rem',
-//   },
-
-//   avatar: {
-//     width: 26,
-//     height: 26,
-//     borderRadius: '50%',
-//     background: '#374151',
-//     color: '#fff',
-//     display: 'flex',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     fontSize: '0.7rem',
-//     fontWeight: '600',
-//     flexShrink: 0,
-//   },
-
-//   senderName: {
-//     color: '#9ca3af',
-//     fontSize: '0.7rem',
-//     margin: '0 0 0.2rem 0.2rem',
-//   },
-
-//   bubble: {
-//     padding: '0.5rem 0.75rem',
-//   },
-
-//   msgText: {
-//     color: '#f1f5f9',
-//     fontSize: '0.82rem',
-//     margin: 0,
-//     lineHeight: 1.5,
-//     wordBreak: 'break-word',
-//     whiteSpace: 'pre-wrap',
-//   },
-
-//   time: {
-//     color: '#4b5563',
-//     fontSize: '0.65rem',
-//     margin: '0.15rem 0.2rem 0',
-//   },
-
-//   inputRow: {
-//     display: 'flex',
-//     alignItems: 'flex-end',
-//     gap: '0.4rem',
-//     padding: '0.6rem',
-//     borderTop: '1px solid #2d2d4e',
-//     background: '#1a1a2e',
-//     flexShrink: 0,
-//   },
-
-//   input: {
-//     flex: 1,
-//     background: '#252540',
-//     border: '1px solid #374151',
-//     borderRadius: '8px',
-//     color: '#e2e8f0',
-//     padding: '0.5rem 0.75rem',
-//     fontSize: '0.82rem',
-//     resize: 'none',
-//     outline: 'none',
-//     fontFamily: 'sans-serif',
-//     lineHeight: 1.5,
-//     maxHeight: '80px',
-//     overflowY: 'auto',
-//   },
-
-//   sendBtn: {
-//     width: 34,
-//     height: 34,
-//     borderRadius: '8px',
-//     background: '#6c63ff',
-//     border: 'none',
-//     color: '#fff',
-//     cursor: 'pointer',
-//     display: 'flex',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     flexShrink: 0,
-//   },
-// };
