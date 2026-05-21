@@ -5,7 +5,7 @@ import axios from 'axios';
 const AuthContext = createContext(); //global container for authentication data.
 
 // Base URL for all API calls — change this once when deploying
-axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.baseURL = 'https://collabx-1-3rml.onrender.com';
 
 export const AuthProvider = ({ children }) => { //This wraps the app and provides authentication data to all components.
   const [user, setUser] = useState(null); //logged in user info
