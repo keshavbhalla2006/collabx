@@ -29,15 +29,11 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        '/api/auth/register',
-        form
-      );
+      const res = await axios.post('/api/auth/register', form);
 
       login(res.data.user, res.data.token);
 
       navigate('/dashboard');
-
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -50,91 +46,110 @@ export default function Register() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.card}>
+      <div style={styles.bgGlow1} />
+      <div style={styles.bgGlow2} />
 
-        <div style={styles.formWrap}>
-
-          <h1 style={styles.logo}>
-            CollabX
-          </h1>
-
-          <h2 style={styles.title}>
-            Create your account
-          </h2>
-
-          {error && (
-            <p style={styles.error}>
-              {error}
-            </p>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <input
-              style={styles.input}
-              type="text"
-              name="name"
-              placeholder="Full name"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              style={styles.input}
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-
-            <input
-              style={styles.input}
-              type="password"
-              name="password"
-              placeholder="Password (min 6 chars)"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-
-            <button
-              style={styles.btn}
-              type="submit"
-              disabled={loading}
-            >
-              {loading
-                ? 'Creating account...'
-                : 'Create account'}
-            </button>
-          </form>
-
-          <div style={styles.divider}>
-            <span>or</span>
-          </div>
-
-          <a
-            style={styles.googleBtn}
-            href={`${
-              import.meta.env.VITE_API_URL ||
-              'http://localhost:5000'
-            }/api/auth/google`}
-          >
-            Continue with Google
-          </a>
-
-          <p style={styles.footer}>
-            Already have an account?{' '}
-
-            <Link
-              to="/login"
-              style={styles.footerLink}
-            >
-              Sign in
-            </Link>
+      <div style={styles.wrapper}>
+        <div style={styles.left}>
+          <p style={styles.brandTag}>
+            GOLD • OBSIDIAN • COLLAB
           </p>
 
+          <h1 style={styles.heroTitle}>
+            Build.
+            <br />
+            Collaborate.
+            <br />
+            Ship Faster.
+          </h1>
+
+          <p style={styles.heroText}>
+            Create collaborative coding rooms with
+            real-time chat, AI interview questions,
+            live coding, and video collaboration.
+          </p>
+        </div>
+
+        <div style={styles.right}>
+          <div style={styles.card}>
+            <h1 style={styles.logo}>CollabX</h1>
+
+            <h2 style={styles.title}>
+              Create your account
+            </h2>
+
+            {error && (
+              <p style={styles.error}>
+                {error}
+              </p>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <input
+                style={styles.input}
+                type="text"
+                name="name"
+                placeholder="Full name"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                style={styles.input}
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                style={styles.input}
+                type="password"
+                name="password"
+                placeholder="Password (min 6 chars)"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+
+              <button
+                style={styles.btn}
+                type="submit"
+                disabled={loading}
+              >
+                {loading
+                  ? 'Creating account...'
+                  : 'Create account'}
+              </button>
+            </form>
+
+            <div style={styles.divider}>
+              <span>or</span>
+            </div>
+
+            <a
+              style={styles.googleBtn}
+              href={`${
+                import.meta.env.VITE_API_URL ||
+                'http://localhost:5000'
+              }/api/auth/google`}
+            >
+              Continue with Google
+            </a>
+
+            <p style={styles.footer}>
+              Already have an account?{' '}
+              <Link
+                to="/login"
+                style={styles.link}
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -144,222 +159,190 @@ export default function Register() {
 const styles = {
   page: {
     minHeight: '100vh',
-
-    background: `
-      radial-gradient(
-        circle at top,
-        rgba(212,175,55,0.08),
-        transparent 35%
-      ),
-      #090c11
-    `,
-
+    width: '100%',
+    background:
+      'linear-gradient(135deg, #05070a 0%, #090c11 40%, #0d1117 100%)',
+    position: 'relative',
+    overflow: 'hidden',
     fontFamily: "'Syne', sans-serif",
+  },
 
+  bgGlow1: {
+    position: 'absolute',
+    width: '500px',
+    height: '500px',
+    borderRadius: '50%',
+    background:
+      'rgba(212,175,55,0.08)',
+    filter: 'blur(120px)',
+    top: '-180px',
+    left: '-120px',
+  },
+
+  bgGlow2: {
+    position: 'absolute',
+    width: '400px',
+    height: '400px',
+    borderRadius: '50%',
+    background:
+      'rgba(212,175,55,0.05)',
+    filter: 'blur(120px)',
+    bottom: '-150px',
+    right: '-100px',
+  },
+
+  wrapper: {
+    position: 'relative',
+    zIndex: 2,
+    minHeight: '100vh',
+    display: 'grid',
+    gridTemplateColumns: '1.1fr 0.9fr',
+  },
+
+  left: {
     display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '4rem',
+  },
 
-    alignItems: 'stretch',
+  brandTag: {
+    color: '#d4af37',
+    fontSize: '0.8rem',
+    letterSpacing: '0.22em',
+    marginBottom: '1.2rem',
+    fontWeight: '700',
+  },
 
-    justifyContent: 'stretch',
+  heroTitle: {
+    color: '#f3f4f6',
+    fontSize: '4.5rem',
+    lineHeight: '0.95',
+    margin: 0,
+    fontWeight: '800',
+    letterSpacing: '-0.05em',
+  },
+
+  heroText: {
+    marginTop: '1.8rem',
+    color: '#7b8494',
+    fontSize: '1rem',
+    maxWidth: '520px',
+    lineHeight: '1.8',
+  },
+
+  right: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '2rem',
   },
 
   card: {
     width: '100%',
-
-    minHeight: '100vh',
-
-    background: '#090c11',
-
-    padding: '4rem 1.5rem',
-
-    display: 'flex',
-
-    flexDirection: 'column',
-
-    justifyContent: 'center',
-  },
-
-  formWrap: {
-    width: '100%',
     maxWidth: '420px',
-    margin: '0 auto',
+    background:
+      'rgba(10,14,20,0.88)',
+    backdropFilter: 'blur(18px)',
+    border:
+      '1px solid rgba(212,175,55,0.14)',
+    borderRadius: '24px',
+    padding: '2.5rem',
+    boxShadow:
+      '0 0 40px rgba(0,0,0,0.45)',
   },
 
   logo: {
-    textAlign: 'center',
-
-    fontSize: '2rem',
-
-    fontWeight: '800',
-
-    marginBottom: '0.4rem',
-
     color: '#d4af37',
-
-    letterSpacing: '0.08em',
-
-    textTransform: 'uppercase',
+    fontSize: '2rem',
+    margin: 0,
+    marginBottom: '0.4rem',
+    fontWeight: '800',
+    letterSpacing: '-0.03em',
   },
 
   title: {
-    textAlign: 'center',
-
-    fontSize: '0.9rem',
-
-    fontWeight: '600',
-
+    color: '#e5e7eb',
+    fontSize: '1rem',
+    fontWeight: '500',
     marginBottom: '2rem',
-
-    color: '#8a9199',
-
-    letterSpacing: '0.08em',
-
-    textTransform: 'uppercase',
   },
 
   input: {
-    display: 'block',
-
     width: '100%',
-
-    padding: '1rem',
-
+    padding: '0.95rem 1rem',
     marginBottom: '1rem',
-
-    background: '#0e1218',
-
-    border: '1px solid rgba(255,255,255,0.08)',
-
+    background: '#0f141b',
+    border:
+      '1px solid rgba(255,255,255,0.08)',
     borderRadius: '12px',
-
-    color: '#e8ecf0',
-
+    color: '#f3f4f6',
     fontSize: '0.95rem',
-
-    boxSizing: 'border-box',
-
     outline: 'none',
-
-    fontFamily: "'Syne', sans-serif",
+    boxSizing: 'border-box',
   },
 
   btn: {
     width: '100%',
-
-    padding: '1rem',
-
-    background: `
-      linear-gradient(
-        135deg,
-        rgba(212,175,55,0.15),
-        rgba(212,175,55,0.08)
-      )
-    `,
-
-    color: '#d4af37',
-
-    border: '1px solid rgba(212,175,55,0.35)',
-
+    padding: '0.95rem',
+    background:
+      'linear-gradient(135deg,#d4af37,#f4d06f)',
+    color: '#090c11',
+    border: 'none',
     borderRadius: '12px',
-
-    fontSize: '0.82rem',
-
+    fontWeight: '800',
+    fontSize: '0.95rem',
     cursor: 'pointer',
-
-    fontWeight: '700',
-
-    fontFamily: "'Syne', sans-serif",
-
-    letterSpacing: '0.08em',
-
-    textTransform: 'uppercase',
-
-    transition: 'all 0.2s ease',
+    marginTop: '0.4rem',
+    transition: '0.2s',
   },
 
   googleBtn: {
     display: 'flex',
-
     alignItems: 'center',
-
     justifyContent: 'center',
-
     width: '100%',
-
-    padding: '1rem',
-
-    border: '1px solid rgba(255,255,255,0.08)',
-
+    padding: '0.9rem',
     borderRadius: '12px',
-
-    textAlign: 'center',
-
     textDecoration: 'none',
-
-    background: 'rgba(255,255,255,0.03)',
-
-    color: '#c8cdd4',
-
-    fontSize: '0.85rem',
-
+    background:
+      'rgba(255,255,255,0.04)',
+    border:
+      '1px solid rgba(255,255,255,0.08)',
+    color: '#d1d5db',
     fontWeight: '600',
-
-    marginTop: '0.75rem',
-
     boxSizing: 'border-box',
-
-    transition: 'all 0.2s ease',
   },
 
   divider: {
     textAlign: 'center',
-
-    margin: '1.5rem 0',
-
-    color: '#4a5260',
-
-    fontSize: '0.78rem',
-
-    textTransform: 'uppercase',
-
-    letterSpacing: '0.08em',
+    margin: '1.2rem 0',
+    color: '#5c6472',
+    fontSize: '0.82rem',
   },
 
   error: {
-    background: 'rgba(220,38,38,0.08)',
-
-    border: '1px solid rgba(220,38,38,0.2)',
-
+    background:
+      'rgba(220,38,38,0.12)',
+    border:
+      '1px solid rgba(220,38,38,0.25)',
     color: '#f87171',
-
     padding: '0.8rem 1rem',
-
-    borderRadius: '10px',
-
+    borderRadius: '12px',
     marginBottom: '1rem',
-
-    fontSize: '0.82rem',
-
-    lineHeight: 1.5,
+    fontSize: '0.88rem',
   },
 
   footer: {
     textAlign: 'center',
-
     marginTop: '1.5rem',
-
-    fontSize: '0.82rem',
-
-    color: '#6b7280',
-
-    lineHeight: 1.6,
+    color: '#7b8494',
+    fontSize: '0.9rem',
   },
 
-  footerLink: {
+  link: {
     color: '#d4af37',
-
     textDecoration: 'none',
-
     fontWeight: '700',
   },
 };
