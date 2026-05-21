@@ -68,7 +68,7 @@ export default function Login() {
   Continue with Google
 </a>
 
-        <p style={styles.footer}>
+       <p style={styles.footer}>
   No account?{' '}
   <Link
     to="/register"
@@ -81,6 +81,10 @@ export default function Login() {
     Register
   </Link>
 </p>
+      </div>
+    </div>
+  );
+}
 
 const styles = {
   page: {
