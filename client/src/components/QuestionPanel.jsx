@@ -1,13 +1,355 @@
 import { useState, useEffect } from 'react';
-import { FiRefreshCw, FiChevronDown, FiChevronUp, FiCpu } from 'react-icons/fi';
+import {
+  FiRefreshCw,
+  FiChevronDown,
+  FiChevronUp,
+  FiCpu,
+} from 'react-icons/fi';
+
 import { aiAPI, roomAPI } from '../services/api';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+
 const TOPICS = [
-  'Arrays', 'Strings', 'Linked Lists', 'Trees', 'Graphs',
-  'Dynamic Programming', 'Recursion', 'Sorting', 'Binary Search',
-  'Stack and Queue', 'Hash Maps', 'Two Pointers', 'Sliding Window',
+  'Arrays',
+  'Strings',
+  'Linked Lists',
+  'Trees',
+  'Graphs',
+  'Dynamic Programming',
+  'Recursion',
+  'Sorting',
+  'Binary Search',
+  'Stack and Queue',
+  'Hash Maps',
+  'Two Pointers',
+  'Sliding Window',
 ];
+
+const QUESTION_PANEL_STYLES = `
+.qp-root{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  background:#090c11;
+  font-family:'Syne',sans-serif;
+  overflow:hidden;
+  border-left:1px solid rgba(212,175,55,0.12);
+}
+
+.qp-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0.7rem 0.9rem;
+  background:rgba(8,11,15,0.95);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  flex-shrink:0;
+}
+
+.qp-header-left{
+  display:flex;
+  align-items:center;
+  gap:0.45rem;
+}
+
+.qp-title{
+  color:#d4af37;
+  font-size:0.78rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+
+.qp-guest{
+  color:#4a5260;
+  font-size:0.68rem;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+}
+
+.qp-controls{
+  display:flex;
+  flex-direction:column;
+  gap:0.55rem;
+  padding:0.85rem;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  flex-shrink:0;
+}
+
+.qp-select{
+  background:#0e1218;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px;
+  color:#d7dce2;
+  padding:0.55rem 0.75rem;
+  font-size:0.8rem;
+  font-family:'Syne',sans-serif;
+  outline:none;
+  transition:all .2s;
+}
+
+.qp-select:focus{
+  border-color:rgba(212,175,55,0.45);
+  box-shadow:0 0 0 3px rgba(212,175,55,0.08);
+}
+
+.qp-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0.45rem;
+
+  background:linear-gradient(
+    135deg,
+    rgba(212,175,55,0.15),
+    rgba(212,175,55,0.08)
+  );
+
+  border:1px solid rgba(212,175,55,0.35);
+  color:#d4af37;
+
+  border-radius:8px;
+  padding:0.65rem;
+  cursor:pointer;
+
+  font-family:'Syne',sans-serif;
+  font-size:0.76rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+
+  transition:all .2s;
+}
+
+.qp-btn:hover{
+  background:rgba(212,175,55,0.18);
+  border-color:rgba(212,175,55,0.7);
+  box-shadow:0 0 16px rgba(212,175,55,0.12);
+}
+
+.qp-error{
+  background:rgba(220,38,38,0.08);
+  border-bottom:1px solid rgba(220,38,38,0.2);
+  color:#f87171;
+  padding:0.6rem 0.8rem;
+  font-size:0.72rem;
+}
+
+.qp-loading,
+.qp-empty{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:0.9rem;
+  padding:2rem;
+  text-align:center;
+}
+
+.qp-loading-text,
+.qp-empty-text{
+  color:#4a5260;
+  font-size:0.78rem;
+  line-height:1.6;
+  max-width:260px;
+}
+
+.qp-dots{
+  display:flex;
+  gap:5px;
+}
+
+.qp-dot{
+  color:#d4af37;
+  font-size:1rem;
+  animation:blink 1.2s infinite;
+}
+
+.qp-body{
+  flex:1;
+  overflow-y:auto;
+  padding:0.9rem;
+}
+
+.qp-card{
+  background:#0e1218;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  padding:1rem;
+}
+
+.qp-question-title{
+  color:#f3f5f7;
+  font-size:1rem;
+  font-weight:700;
+  line-height:1.4;
+  margin:0 0 0.75rem;
+}
+
+.qp-meta{
+  display:flex;
+  gap:0.5rem;
+  margin-bottom:1rem;
+  flex-wrap:wrap;
+}
+
+.qp-badge{
+  padding:0.22rem 0.55rem;
+  border-radius:5px;
+  font-size:0.65rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+
+.qp-badge.diff{
+  border:1px solid rgba(212,175,55,0.3);
+  color:#d4af37;
+  background:rgba(212,175,55,0.06);
+}
+
+.qp-badge.topic{
+  border:1px solid rgba(255,255,255,0.08);
+  color:#8a9199;
+  background:rgba(255,255,255,0.03);
+}
+
+.qp-description{
+  color:#cfd5dc;
+  font-size:0.84rem;
+  line-height:1.8;
+}
+
+.qp-section{
+  margin-top:1rem;
+}
+
+.qp-section-label{
+  color:#d4af37;
+  font-size:0.68rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:0.55rem;
+}
+
+.qp-example{
+  background:#11161f;
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:10px;
+  padding:0.85rem;
+  margin-top:0.75rem;
+}
+
+.qp-example-title{
+  color:#d4af37;
+  font-size:0.68rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:0.55rem;
+}
+
+.qp-line{
+  margin:0.3rem 0;
+  color:#cfd5dc;
+  font-size:0.78rem;
+  line-height:1.6;
+}
+
+.qp-code{
+  background:#0b0f14;
+  border:1px solid rgba(212,175,55,0.08);
+  color:#f5d97b;
+  padding:0.14rem 0.45rem;
+  border-radius:5px;
+  font-size:0.76rem;
+  font-family:'Fira Code',monospace;
+}
+
+.qp-collapse{
+  display:flex;
+  align-items:center;
+  gap:0.35rem;
+
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+
+  color:#8a9199;
+
+  border-radius:7px;
+  padding:0.45rem 0.7rem;
+  cursor:pointer;
+
+  font-size:0.74rem;
+  font-family:'Syne',sans-serif;
+  transition:all .2s;
+}
+
+.qp-collapse:hover{
+  border-color:rgba(212,175,55,0.25);
+  color:#d4af37;
+}
+
+.qp-list{
+  margin-top:0.75rem;
+  padding-left:1.2rem;
+}
+
+.qp-list li{
+  color:#cfd5dc;
+  font-size:0.8rem;
+  margin-bottom:0.45rem;
+  line-height:1.6;
+}
+
+.qp-starter{
+  margin-top:0.75rem;
+  display:flex;
+  flex-direction:column;
+  gap:0.75rem;
+}
+
+.qp-starter-block{
+  background:#11161f;
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.qp-starter-label{
+  background:#0b0f14;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  color:#d4af37;
+  padding:0.55rem 0.8rem;
+  font-size:0.7rem;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+
+.qp-pre{
+  margin:0;
+  padding:0.9rem;
+  overflow-x:auto;
+  color:#d7dce2;
+  font-size:0.76rem;
+  line-height:1.6;
+  font-family:'Fira Code',monospace;
+  white-space:pre-wrap;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+@keyframes blink{
+  0%,100%{opacity:.25}
+  50%{opacity:1}
+}
+`;
 
 export default function QuestionPanel({
   socket,
@@ -17,21 +359,28 @@ export default function QuestionPanel({
   externalQuestion,
 }) {
   const [question, setQuestion] = useState(null);
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState('');
+
   const [topic, setTopic] = useState('Arrays');
+
   const [difficulty, setDifficulty] = useState('Medium');
+
   const [showHints, setShowHints] = useState(false);
+
   const [showStarter, setShowStarter] = useState(false);
 
-  // Load saved question when component mounts
   useEffect(() => {
     if (!roomId) return;
 
     const loadQuestion = async () => {
       try {
         const res = await roomAPI.getRoom(roomId);
-        const savedQuestion = res.data.room?.current_question;
+
+        const savedQuestion =
+          res.data.room?.current_question;
 
         if (savedQuestion) {
           const parsed =
@@ -42,38 +391,20 @@ export default function QuestionPanel({
           setQuestion(parsed);
         }
       } catch (err) {
-        console.error('Failed to load saved question:', err);
+        console.error(
+          'Failed to load saved question:',
+          err
+        );
       }
     };
 
     loadQuestion();
   }, [roomId]);
 
-  // // Listen for question updates from other room members
-  // // (when host loads a question, everyone gets it)
-  // useEffect(() => {
-  //   if (!socket) return;
-
-  //   const handleQuestionUpdate = ({ question: q }) => {
-  //     setQuestion(q);
-  //     setShowHints(false);
-  //     setShowStarter(false);
-  //     setError('');
-  //   };
-
-  //   socket.on('question-update', handleQuestionUpdate);
-
-  //   return () => {
-  //     socket.off('question-update', handleQuestionUpdate);
-  //   };
-  // }, [socket]);
-
-  // Sync question from Room.jsx
   useEffect(() => {
     if (externalQuestion) {
       setQuestion(externalQuestion);
 
-      // Reset UI state on new question
       setShowHints(false);
       setShowStarter(false);
       setError('');
@@ -82,8 +413,11 @@ export default function QuestionPanel({
 
   const handleGenerate = async () => {
     setLoading(true);
+
     setError('');
+
     setShowHints(false);
+
     setShowStarter(false);
 
     try {
@@ -95,610 +429,324 @@ export default function QuestionPanel({
 
       const q = res.data.question;
 
-      // Broadcast to all room members via socket
       socket?.emit('question-loaded', {
         roomId,
         question: q,
       });
-
-      // setQuestion will be called by the socket listener above
-      // for everyone including the host
-
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        'Failed to generate question. Try again.'
+          'Failed to generate question. Try again.'
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const difficultyColor = (d) => {
-    if (d === 'Easy') return '#4ade80';
-    if (d === 'Medium') return '#facc15';
-    if (d === 'Hard') return '#f87171';
-    return '#9ca3af';
-  };
-
   return (
-    <div style={s.panel}>
+    <>
+      <style>{QUESTION_PANEL_STYLES}</style>
 
-      {/* ── Header ── */}
-      <div style={s.header}>
-        <div style={s.headerLeft}>
-          <FiCpu size={14} color="#a78bfa" />
-          <span style={s.title}>AI Question Engine</span>
-        </div>
+      <div className="qp-root">
 
-        {!isHost && question && (
-          <span style={s.guestNote}>loaded by host</span>
-        )}
-      </div>
+        {/* Header */}
 
-      {/* ── Controls — only host can generate ── */}
-      {isHost && (
-        <div style={s.controls}>
-          <select
-            style={s.select}
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-          >
-            {TOPICS.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+        <div className="qp-header">
+          <div className="qp-header-left">
+            <FiCpu size={14} color="#d4af37" />
 
-          <select
-            style={s.select}
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-          >
-            {DIFFICULTIES.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-
-          <button
-            style={{
-              ...s.generateBtn,
-              opacity: loading ? 0.7 : 1,
-            }}
-            onClick={handleGenerate}
-            disabled={loading}
-          >
-            <FiRefreshCw
-              size={13}
-              style={{
-                animation: loading
-                  ? 'spin 1s linear infinite'
-                  : 'none',
-              }}
-            />
-
-            {loading
-              ? 'Generating...'
-              : 'Generate Question'}
-          </button>
-        </div>
-      )}
-
-      {error && <div style={s.error}>{error}</div>}
-
-      {/* ── Loading state ── */}
-      {loading && (
-        <div style={s.loadingBox}>
-          <p style={s.loadingText}>
-            Grok is generating your question...
-          </p>
-
-          <div style={s.loadingDots}>
-            <span style={s.dot}>●</span>
-
-            <span
-              style={{
-                ...s.dot,
-                animationDelay: '0.2s',
-              }}
-            >
-              ●
-            </span>
-
-            <span
-              style={{
-                ...s.dot,
-                animationDelay: '0.4s',
-              }}
-            >
-              ●
+            <span className="qp-title">
+              AI Question Engine
             </span>
           </div>
+
+          {!isHost && question && (
+            <span className="qp-guest">
+              loaded by host
+            </span>
+          )}
         </div>
-      )}
 
-      {/* ── Empty state ── */}
-      {!question && !loading && (
-        <div style={s.empty}>
-          <FiCpu size={32} color="#374151" />
+        {/* Controls */}
 
-          <p style={s.emptyText}>
-            {isHost
-              ? 'Select a topic and difficulty, then generate a question.'
-              : 'Waiting for the host to load a question...'}
-          </p>
-        </div>
-      )}
+        {isHost && (
+          <div className="qp-controls">
 
-      {/* ── Question display ── */}
-      {question && !loading && (
-        <div style={s.questionBody}>
+            <select
+              className="qp-select"
+              value={topic}
+              onChange={(e) =>
+                setTopic(e.target.value)
+              }
+            >
+              {TOPICS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
 
-          {/* Title + meta */}
-          <div style={s.titleRow}>
-            <h2 style={s.questionTitle}>
-              {question.title}
-            </h2>
+            <select
+              className="qp-select"
+              value={difficulty}
+              onChange={(e) =>
+                setDifficulty(e.target.value)
+              }
+            >
+              {DIFFICULTIES.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
 
-            <div style={s.metaRow}>
-              <span
+            <button
+              className="qp-btn"
+              onClick={handleGenerate}
+              disabled={loading}
+              style={{
+                opacity: loading ? 0.7 : 1,
+              }}
+            >
+              <FiRefreshCw
+                size={13}
                 style={{
-                  ...s.diffBadge,
-                  color: difficultyColor(question.difficulty),
-                  borderColor: difficultyColor(question.difficulty),
+                  animation: loading
+                    ? 'spin 1s linear infinite'
+                    : 'none',
                 }}
+              />
+
+              {loading
+                ? 'Generating...'
+                : 'Generate Question'}
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div className="qp-error">
+            {error}
+          </div>
+        )}
+
+        {/* Loading */}
+
+        {loading && (
+          <div className="qp-loading">
+            <FiCpu size={30} color="#d4af37" />
+
+            <p className="qp-loading-text">
+              Grok is generating your question...
+            </p>
+
+            <div className="qp-dots">
+              <span className="qp-dot">●</span>
+
+              <span
+                className="qp-dot"
+                style={{ animationDelay: '0.2s' }}
               >
-                {question.difficulty}
+                ●
               </span>
 
-              <span style={s.topicBadge}>
-                {question.topic}
+              <span
+                className="qp-dot"
+                style={{ animationDelay: '0.4s' }}
+              >
+                ●
               </span>
             </div>
           </div>
+        )}
 
-          {/* Description */}
-          <div style={s.section}>
-            <p style={s.description}>
-              {question.description}
+        {/* Empty */}
+
+        {!question && !loading && (
+          <div className="qp-empty">
+            <FiCpu size={34} color="#d4af37" />
+
+            <p className="qp-empty-text">
+              {isHost
+                ? 'Select a topic and difficulty, then generate a question.'
+                : 'Waiting for the host to load a question...'}
             </p>
           </div>
+        )}
 
-          {/* Examples */}
-          {question.examples?.map((ex, i) => (
-            <div key={i} style={s.exampleBox}>
-              <p style={s.exampleLabel}>
-                Example {i + 1}
-              </p>
+        {/* Question */}
 
-              <div style={s.exampleContent}>
-                <p style={s.exampleLine}>
-                  <span style={s.exLabel}>Input:</span>
+        {question && !loading && (
+          <div className="qp-body">
+            <div className="qp-card">
 
-                  <code style={s.code}>
-                    {ex.input}
-                  </code>
-                </p>
+              <h2 className="qp-question-title">
+                {question.title}
+              </h2>
 
-                <p style={s.exampleLine}>
-                  <span style={s.exLabel}>Output:</span>
+              <div className="qp-meta">
 
-                  <code style={s.code}>
-                    {ex.output}
-                  </code>
-                </p>
+                <span className="qp-badge diff">
+                  {question.difficulty}
+                </span>
 
-                {ex.explanation && (
-                  <p style={s.explanation}>
-                    <span style={s.exLabel}>
-                      Explanation:
-                    </span>{' '}
-                    {ex.explanation}
-                  </p>
-                )}
+                <span className="qp-badge topic">
+                  {question.topic}
+                </span>
+
               </div>
-            </div>
-          ))}
 
-          {/* Constraints */}
-          {question.constraints?.length > 0 && (
-            <div style={s.section}>
-              <p style={s.sectionLabel}>
-                Constraints
+              <p className="qp-description">
+                {question.description}
               </p>
 
-              <ul style={s.list}>
-                {question.constraints.map((c, i) => (
-                  <li key={i} style={s.listItem}>
-                    <code style={s.code}>{c}</code>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+              {/* Examples */}
 
-          {/* Hints — collapsible */}
-          {question.hints?.length > 0 && (
-            <div style={s.section}>
-              <button
-                style={s.collapseBtn}
-                onClick={() => setShowHints(!showHints)}
-              >
-                {showHints
-                  ? <FiChevronUp size={14} />
-                  : <FiChevronDown size={14} />}
+              {question.examples?.map((ex, i) => (
+                <div
+                  key={i}
+                  className="qp-example"
+                >
+                  <div className="qp-example-title">
+                    Example {i + 1}
+                  </div>
 
-                {showHints
-                  ? 'Hide Hints'
-                  : `Show Hints (${question.hints.length})`}
-              </button>
+                  <p className="qp-line">
+                    <strong>Input:</strong>{' '}
+                    <code className="qp-code">
+                      {ex.input}
+                    </code>
+                  </p>
 
-              {showHints && (
-                <ol style={s.list}>
-                  {question.hints.map((h, i) => (
-                    <li key={i} style={s.listItem}>
-                      {h}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-          )}
+                  <p className="qp-line">
+                    <strong>Output:</strong>{' '}
+                    <code className="qp-code">
+                      {ex.output}
+                    </code>
+                  </p>
 
-          {/* Starter code — collapsible */}
-          {question.starterCode && (
-            <div style={s.section}>
-              <button
-                style={s.collapseBtn}
-                onClick={() => setShowStarter(!showStarter)}
-              >
-                {showStarter
-                  ? <FiChevronUp size={14} />
-                  : <FiChevronDown size={14} />}
-
-                {showStarter
-                  ? 'Hide Starter Code'
-                  : 'Show Starter Code'}
-              </button>
-
-              {showStarter && (
-                <div style={s.starterBox}>
-                  {Object.entries(question.starterCode).map(
-                    ([lang, code]) => (
-                      <div key={lang} style={s.starterLang}>
-                        <p style={s.starterLangLabel}>
-                          {lang}
-                        </p>
-
-                        <pre style={s.pre}>
-                          {code}
-                        </pre>
-                      </div>
-                    )
+                  {ex.explanation && (
+                    <p className="qp-line">
+                      <strong>Explanation:</strong>{' '}
+                      {ex.explanation}
+                    </p>
                   )}
                 </div>
+              ))}
+
+              {/* Constraints */}
+
+              {question.constraints?.length > 0 && (
+                <div className="qp-section">
+
+                  <div className="qp-section-label">
+                    Constraints
+                  </div>
+
+                  <ul className="qp-list">
+                    {question.constraints.map(
+                      (c, i) => (
+                        <li key={i}>
+                          <code className="qp-code">
+                            {c}
+                          </code>
+                        </li>
+                      )
+                    )}
+                  </ul>
+
+                </div>
               )}
+
+              {/* Hints */}
+
+              {question.hints?.length > 0 && (
+                <div className="qp-section">
+
+                  <button
+                    className="qp-collapse"
+                    onClick={() =>
+                      setShowHints(!showHints)
+                    }
+                  >
+                    {showHints
+                      ? <FiChevronUp size={14} />
+                      : <FiChevronDown size={14} />}
+
+                    {showHints
+                      ? 'Hide Hints'
+                      : `Show Hints (${question.hints.length})`}
+                  </button>
+
+                  {showHints && (
+                    <ol className="qp-list">
+                      {question.hints.map(
+                        (h, i) => (
+                          <li key={i}>
+                            {h}
+                          </li>
+                        )
+                      )}
+                    </ol>
+                  )}
+
+                </div>
+              )}
+
+              {/* Starter Code */}
+
+              {question.starterCode && (
+                <div className="qp-section">
+
+                  <button
+                    className="qp-collapse"
+                    onClick={() =>
+                      setShowStarter(!showStarter)
+                    }
+                  >
+                    {showStarter
+                      ? <FiChevronUp size={14} />
+                      : <FiChevronDown size={14} />}
+
+                    {showStarter
+                      ? 'Hide Starter Code'
+                      : 'Show Starter Code'}
+                  </button>
+
+                  {showStarter && (
+                    <div className="qp-starter">
+
+                      {Object.entries(
+                        question.starterCode
+                      ).map(([lang, code]) => (
+
+                        <div
+                          key={lang}
+                          className="qp-starter-block"
+                        >
+
+                          <div className="qp-starter-label">
+                            {lang}
+                          </div>
+
+                          <pre className="qp-pre">
+                            {code}
+                          </pre>
+
+                        </div>
+                      ))}
+
+                    </div>
+                  )}
+
+                </div>
+              )}
+
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      <style>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes blink {
-          0%, 100% {
-            opacity: 0.2;
-          }
-
-          50% {
-            opacity: 1;
-          }
-        }
-      `}</style>
-    </div>
+      </div>
+    </>
   );
 }
-
-const s = {
-  panel: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    background: '#0f0f1a',
-    fontFamily: 'sans-serif',
-    overflowY: 'auto',
-  },
-
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0.6rem 0.75rem',
-    background: '#13131f',
-    borderBottom: '1px solid #2d2d4e',
-    flexShrink: 0,
-  },
-
-  headerLeft: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.4rem',
-  },
-
-  title: {
-    color: '#a78bfa',
-    fontSize: '0.8rem',
-    fontWeight: '600',
-  },
-
-  guestNote: {
-    color: '#4b5563',
-    fontSize: '0.7rem',
-  },
-
-  controls: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-    padding: '0.75rem',
-    borderBottom: '1px solid #2d2d4e',
-    flexShrink: 0,
-  },
-
-  select: {
-    background: '#1f1f35',
-    border: '1px solid #374151',
-    borderRadius: '6px',
-    color: '#e2e8f0',
-    padding: '0.4rem 0.6rem',
-    fontSize: '0.82rem',
-    cursor: 'pointer',
-    width: '100%',
-  },
-
-  generateBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.4rem',
-    background: '#6c63ff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    padding: '0.5rem',
-    fontSize: '0.82rem',
-    cursor: 'pointer',
-    fontWeight: '600',
-    width: '100%',
-  },
-
-  error: {
-    background: '#450a0a',
-    color: '#f87171',
-    padding: '0.5rem 0.75rem',
-    fontSize: '0.75rem',
-  },
-
-  loadingBox: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '2rem',
-    gap: '0.75rem',
-  },
-
-  loadingText: {
-    color: '#9ca3af',
-    fontSize: '0.82rem',
-  },
-
-  loadingDots: {
-    display: 'flex',
-    gap: '4px',
-  },
-
-  dot: {
-    color: '#6c63ff',
-    fontSize: '1rem',
-    animation: 'blink 1.2s infinite',
-    display: 'inline-block',
-  },
-
-  empty: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '1rem',
-    padding: '2rem',
-  },
-
-  emptyText: {
-    color: '#4b5563',
-    fontSize: '0.82rem',
-    textAlign: 'center',
-    lineHeight: 1.6,
-  },
-
-  questionBody: {
-    padding: '0.75rem',
-    overflowY: 'auto',
-  },
-
-  titleRow: {
-    marginBottom: '0.75rem',
-  },
-
-  questionTitle: {
-    color: '#f1f5f9',
-    fontSize: '1rem',
-    fontWeight: '700',
-    margin: '0 0 0.5rem',
-    lineHeight: 1.3,
-  },
-
-  metaRow: {
-    display: 'flex',
-    gap: '0.5rem',
-    alignItems: 'center',
-  },
-
-  diffBadge: {
-    fontSize: '0.72rem',
-    padding: '0.15rem 0.5rem',
-    borderRadius: '4px',
-    border: '1px solid',
-    fontWeight: '600',
-  },
-
-  topicBadge: {
-    fontSize: '0.72rem',
-    padding: '0.15rem 0.5rem',
-    borderRadius: '4px',
-    background: '#1f1f35',
-    color: '#9ca3af',
-  },
-
-  section: {
-    marginBottom: '1rem',
-  },
-
-  sectionLabel: {
-    color: '#9ca3af',
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginBottom: '0.4rem',
-  },
-
-  description: {
-    color: '#e2e8f0',
-    fontSize: '0.85rem',
-    lineHeight: 1.7,
-    margin: 0,
-  },
-
-  exampleBox: {
-    background: '#13131f',
-    border: '1px solid #2d2d4e',
-    borderRadius: '8px',
-    padding: '0.75rem',
-    marginBottom: '0.75rem',
-  },
-
-  exampleLabel: {
-    color: '#6c63ff',
-    fontSize: '0.72rem',
-    fontWeight: '700',
-    margin: '0 0 0.5rem',
-    textTransform: 'uppercase',
-  },
-
-  exampleContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.3rem',
-  },
-
-  exampleLine: {
-    margin: 0,
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '0.4rem',
-    alignItems: 'center',
-  },
-
-  exLabel: {
-    color: '#9ca3af',
-    fontSize: '0.78rem',
-    fontWeight: '600',
-  },
-
-  code: {
-    background: '#1f1f35',
-    color: '#a78bfa',
-    padding: '0.1rem 0.4rem',
-    borderRadius: '4px',
-    fontSize: '0.78rem',
-    fontFamily: "'Fira Code', monospace",
-  },
-
-  explanation: {
-    color: '#9ca3af',
-    fontSize: '0.78rem',
-    margin: '0.2rem 0 0',
-    lineHeight: 1.5,
-  },
-
-  list: {
-    margin: '0.25rem 0 0',
-    paddingLeft: '1.2rem',
-  },
-
-  listItem: {
-    color: '#d1d5db',
-    fontSize: '0.82rem',
-    marginBottom: '0.25rem',
-    lineHeight: 1.5,
-  },
-
-  collapseBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.3rem',
-    background: 'transparent',
-    border: '1px solid #374151',
-    borderRadius: '6px',
-    color: '#9ca3af',
-    padding: '0.3rem 0.6rem',
-    fontSize: '0.78rem',
-    cursor: 'pointer',
-    marginBottom: '0.5rem',
-  },
-
-  starterBox: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-
-  starterLang: {
-    background: '#13131f',
-    border: '1px solid #2d2d4e',
-    borderRadius: '6px',
-    overflow: 'hidden',
-  },
-
-  starterLangLabel: {
-    color: '#6c63ff',
-    fontSize: '0.7rem',
-    fontWeight: '600',
-    padding: '0.3rem 0.6rem',
-    background: '#1f1f35',
-    margin: 0,
-    textTransform: 'uppercase',
-  },
-
-  pre: {
-    color: '#e2e8f0',
-    fontSize: '0.75rem',
-    padding: '0.6rem',
-    margin: 0,
-    overflowX: 'auto',
-    fontFamily: "'Fira Code', monospace",
-    lineHeight: 1.5,
-    whiteSpace: 'pre-wrap',
-  },
-};
