@@ -87,50 +87,44 @@ export default function Login() {
 }
 
 const styles = {
- page: {
-  minHeight: '100vh',
+  page: {
+    minHeight: '100vh',
 
-  background: `
-    radial-gradient(
-      circle at top,
-      rgba(212,175,55,0.08),
-      transparent 35%
-    ),
-    #090c11
-  `,
+    display: 'flex',
 
-  fontFamily: "'Syne', sans-serif",
+    alignItems: 'center',
 
-  display: 'flex',
+    justifyContent: 'center',
 
-  alignItems: 'stretch',
+    padding: '1rem',
 
-  justifyContent: 'stretch',
-},
+    background: `
+      radial-gradient(
+        circle at top,
+        rgba(212,175,55,0.08),
+        transparent 35%
+      ),
+      #090c11
+    `,
+
+    fontFamily: "'Syne', sans-serif",
+  },
 
   card: {
-  width: '100%',
+    width: '100%',
 
-  minHeight: '100vh',
+    maxWidth: '420px',
 
-  background: '#090c11',
+    background: '#0e1218',
 
-  border: 'none',
+    border: '1px solid rgba(255,255,255,0.06)',
 
-  borderRadius: 0,
+    borderRadius: '20px',
 
-  padding: '4rem 1.5rem',
+    padding: '2rem',
 
-  display: 'flex',
-
-  flexDirection: 'column',
-
-  justifyContent: 'center',
-
-  maxWidth: '100%',
-
-  margin: '0 auto',
-},
+    boxShadow: '0 10px 40px rgba(0,0,0,0.35)',
+  },
 
   logo: {
     textAlign: 'center',
