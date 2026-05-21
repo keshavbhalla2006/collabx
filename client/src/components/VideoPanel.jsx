@@ -183,8 +183,8 @@ export default function VideoPanel({
 
       {/* ── CHAT TAB ── */}
       {activeTab === 'chat' && (
-        <ChatPanel socket={socket} roomId={roomId} user={user} pendingMessages={pendingMessages} onMessagesRead={() => setPendingMessages([])} />
-      )}
+  <ChatPanel socket={socket} roomId={roomId} user={user} />
+)}
     </div>
   );
 }
