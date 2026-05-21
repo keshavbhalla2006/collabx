@@ -4,24 +4,45 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError('');
     setLoading(true);
+
     try {
-      const res = await axios.post('/api/auth/register', form);
+      const res = await axios.post(
+        '/api/auth/register',
+        form
+      );
+
       login(res.data.user, res.data.token);
+
       navigate('/dashboard');
+
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed.');
+      setError(
+        err.response?.data?.message ||
+        'Registration failed.'
+      );
     } finally {
       setLoading(false);
     }
@@ -30,42 +51,91 @@ export default function Register() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h1 style={styles.logo}>CollabX</h1>
-        <h2 style={styles.title}>Create your account</h2>
 
-        {error && <p style={styles.error}>{error}</p>}
+        <div style={styles.formWrap}>
 
-        <form onSubmit={handleSubmit}>
-          <input style={styles.input} type="text" name="name" placeholder="Full name" value={form.name} onChange={handleChange} required />
-          <input style={styles.input} type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-          <input style={styles.input} type="password" name="password" placeholder="Password (min 6 chars)" value={form.password} onChange={handleChange} required />
-          <button style={styles.btn} type="submit" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
+          <h1 style={styles.logo}>
+            CollabX
+          </h1>
 
-        <div style={styles.divider}><span>or</span></div>
+          <h2 style={styles.title}>
+            Create your account
+          </h2>
 
-        <a
-  style={styles.googleBtn}
-  href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`}
->
-  Continue with Google
-</a>
+          {error && (
+            <p style={styles.error}>
+              {error}
+            </p>
+          )}
 
-       <p style={styles.footer}>
-  Already have an account?{' '}
-  <Link
-    to="/login"
-    style={{
-      color: '#d4af37',
-      textDecoration: 'none',
-      fontWeight: '700',
-    }}
-  >
-    Sign in
-  </Link>
-</p>
+          <form onSubmit={handleSubmit}>
+            <input
+              style={styles.input}
+              type="text"
+              name="name"
+              placeholder="Full name"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              style={styles.input}
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+
+            <input
+              style={styles.input}
+              type="password"
+              name="password"
+              placeholder="Password (min 6 chars)"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+
+            <button
+              style={styles.btn}
+              type="submit"
+              disabled={loading}
+            >
+              {loading
+                ? 'Creating account...'
+                : 'Create account'}
+            </button>
+          </form>
+
+          <div style={styles.divider}>
+            <span>or</span>
+          </div>
+
+          <a
+            style={styles.googleBtn}
+            href={`${
+              import.meta.env.VITE_API_URL ||
+              'http://localhost:5000'
+            }/api/auth/google`}
+          >
+            Continue with Google
+          </a>
+
+          <p style={styles.footer}>
+            Already have an account?{' '}
+
+            <Link
+              to="/login"
+              style={styles.footerLink}
+            >
+              Sign in
+            </Link>
+          </p>
+
+        </div>
       </div>
     </div>
   );
@@ -74,14 +144,6 @@ export default function Register() {
 const styles = {
   page: {
     minHeight: '100vh',
-
-    display: 'flex',
-
-    alignItems: 'center',
-
-    justifyContent: 'center',
-
-    padding: '1rem',
 
     background: `
       radial-gradient(
@@ -93,32 +155,44 @@ const styles = {
     `,
 
     fontFamily: "'Syne', sans-serif",
+
+    display: 'flex',
+
+    alignItems: 'stretch',
+
+    justifyContent: 'stretch',
   },
 
   card: {
     width: '100%',
 
+    minHeight: '100vh',
+
+    background: '#090c11',
+
+    padding: '4rem 1.5rem',
+
+    display: 'flex',
+
+    flexDirection: 'column',
+
+    justifyContent: 'center',
+  },
+
+  formWrap: {
+    width: '100%',
     maxWidth: '420px',
-
-    background: '#0e1218',
-
-    border: '1px solid rgba(255,255,255,0.06)',
-
-    borderRadius: '20px',
-
-    padding: '2rem',
-
-    boxShadow: '0 10px 40px rgba(0,0,0,0.35)',
+    margin: '0 auto',
   },
 
   logo: {
     textAlign: 'center',
 
-    fontSize: '1.8rem',
+    fontSize: '2rem',
 
     fontWeight: '800',
 
-    marginBottom: '0.35rem',
+    marginBottom: '0.4rem',
 
     color: '#d4af37',
 
@@ -130,15 +204,15 @@ const styles = {
   title: {
     textAlign: 'center',
 
-    fontSize: '0.92rem',
+    fontSize: '0.9rem',
 
     fontWeight: '600',
 
-    marginBottom: '1.8rem',
+    marginBottom: '2rem',
 
     color: '#8a9199',
 
-    letterSpacing: '0.06em',
+    letterSpacing: '0.08em',
 
     textTransform: 'uppercase',
   },
@@ -148,11 +222,11 @@ const styles = {
 
     width: '100%',
 
-    padding: '0.9rem 1rem',
+    padding: '1rem',
 
     marginBottom: '1rem',
 
-    background: '#090c11',
+    background: '#0e1218',
 
     border: '1px solid rgba(255,255,255,0.08)',
 
@@ -167,14 +241,12 @@ const styles = {
     outline: 'none',
 
     fontFamily: "'Syne', sans-serif",
-
-    transition: 'all 0.2s ease',
   },
 
   btn: {
     width: '100%',
 
-    padding: '0.9rem',
+    padding: '1rem',
 
     background: `
       linear-gradient(
@@ -214,7 +286,7 @@ const styles = {
 
     width: '100%',
 
-    padding: '0.9rem',
+    padding: '1rem',
 
     border: '1px solid rgba(255,255,255,0.08)',
 
@@ -242,13 +314,11 @@ const styles = {
   divider: {
     textAlign: 'center',
 
-    margin: '1.4rem 0',
+    margin: '1.5rem 0',
 
     color: '#4a5260',
 
     fontSize: '0.78rem',
-
-    position: 'relative',
 
     textTransform: 'uppercase',
 
@@ -262,7 +332,7 @@ const styles = {
 
     color: '#f87171',
 
-    padding: '0.75rem 1rem',
+    padding: '0.8rem 1rem',
 
     borderRadius: '10px',
 
@@ -283,5 +353,13 @@ const styles = {
     color: '#6b7280',
 
     lineHeight: 1.6,
+  },
+
+  footerLink: {
+    color: '#d4af37',
+
+    textDecoration: 'none',
+
+    fontWeight: '700',
   },
 };
