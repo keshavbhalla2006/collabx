@@ -17,55 +17,407 @@ const LANGUAGES = [
   'php', 'swift', 'kotlin', 'bash'
 ];
 
+const STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; }
+
+  .room-root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #080b0f;
+    font-family: 'Syne', sans-serif;
+    overflow: hidden;
+    color: #c8cdd4;
+  }
+
+  /* ── HEADER ── */
+  .room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    height: 54px;
+    background: rgba(12, 16, 22, 0.95);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .room-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex: 1;
+  }
+
+  .header-center {
+    flex: 1;
+    text-align: center;
+  }
+
+  .header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .back-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #8a9199;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .back-btn:hover {
+    border-color: rgba(212,175,55,0.4);
+    color: #d4af37;
+    background: rgba(212,175,55,0.06);
+  }
+
+  .room-name {
+    color: #e8ecf0;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .invite-btn {
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.2);
+    color: #d4af37;
+    border-radius: 6px;
+    padding: 0.22rem 0.7rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  .invite-btn:hover {
+    background: rgba(212,175,55,0.12);
+    border-color: rgba(212,175,55,0.45);
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #d4af37, #f0d060, #d4af37);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .members-row {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .member-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a1f2e, #2a2f40);
+    border: 1.5px solid rgba(212,175,55,0.35);
+    color: #d4af37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    cursor: default;
+  }
+
+  /* ── TOOLBAR ── */
+  .room-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 1.25rem;
+    background: rgba(10, 14, 20, 0.9);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+  }
+
+  .lang-select {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px;
+    color: #b8bec6;
+    padding: 0.32rem 0.65rem;
+    font-size: 0.78rem;
+    font-family: 'Space Mono', monospace;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .lang-select:focus {
+    border-color: rgba(212,175,55,0.4);
+    color: #d4af37;
+  }
+
+  .lang-select option {
+    background: #0e1218;
+    color: #c8cdd4;
+  }
+
+  .toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  .btn-save {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px;
+    color: #8a9199;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.78rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-save:hover {
+    border-color: rgba(255,255,255,0.22);
+    color: #c8cdd4;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .btn-run {
+    background: linear-gradient(135deg, #1a7a3a, #22a84e);
+    border: none;
+    border-radius: 7px;
+    color: #fff;
+    padding: 0.35rem 1.1rem;
+    font-size: 0.8rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    box-shadow: 0 2px 12px rgba(34,168,78,0.25);
+  }
+
+  .btn-run:hover:not(:disabled) {
+    background: linear-gradient(135deg, #22a84e, #2dd460);
+    box-shadow: 0 4px 18px rgba(34,168,78,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-run:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-toggle {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px;
+    color: #6b7480;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.75rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  .btn-toggle:hover {
+    border-color: rgba(212,175,55,0.3);
+    color: #d4af37;
+    background: rgba(212,175,55,0.04);
+  }
+
+  .btn-toggle.active {
+    border-color: rgba(212,175,55,0.45);
+    color: #d4af37;
+    background: rgba(212,175,55,0.08);
+  }
+
+  .version-msg {
+    color: #4ade80;
+    font-size: 0.74rem;
+    font-family: 'Space Mono', monospace;
+    margin-left: 0.25rem;
+  }
+
+  /* ── MAIN AREA ── */
+  .room-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .editor-col {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.2s ease;
+    position: relative;
+  }
+
+  .editor-col::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(212,175,55,0.15) 30%, rgba(212,175,55,0.15) 70%, transparent);
+    pointer-events: none;
+  }
+
+  .editor-wrapper {
+    flex: 1;
+    overflow: hidden;
+    background: #0a0d12;
+  }
+
+  .output-col {
+    width: 38%;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #080b0f;
+  }
+
+  .question-col {
+    width: 280px;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background: #090c11;
+  }
+
+  /* ── LOADING / ERROR ── */
+  .room-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #080b0f;
+    font-family: 'Syne', sans-serif;
+    color: #6b7480;
+    gap: 1rem;
+  }
+
+  .room-center p {
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .room-center .gold-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #d4af37;
+    animation: pulse 1.4s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .btn-back {
+    padding: 0.55rem 1.4rem;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 8px;
+    background: transparent;
+    color: #d4af37;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover {
+    background: rgba(212,175,55,0.08);
+    border-color: rgba(212,175,55,0.6);
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.4); }
+`;
+
 export default function Room() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { socket } = useSocket();
 
-  // Room state
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Editor state
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
   const [members, setMembers] = useState([]);
   const [versionMsg, setVersionMsg] = useState('');
   const [copied, setCopied] = useState(false);
-
-  // Execution state
   const [executionResult, setExecutionResult] = useState(null);
   const [executing, setExecuting] = useState(false);
   const [stdin, setStdin] = useState('');
   const [outputOpen, setOutputOpen] = useState(false);
   const [showCallToast, setShowCallToast] = useState(false);
   const [questionOpen, setQuestionOpen] = useState(false);
-
-  // NEW: Persist incoming data at Room level
   const [pendingMessages, setPendingMessages] = useState([]);
   const [pendingQuestion, setPendingQuestion] = useState(null);
 
-  //WEBRTC
   const {
-    localStream,
-    remoteStreams,
-    callActive,
-    micOn,
-    cameraOn,
-    error: webrtcError,
-    startCall,
-    endCall,
-    toggleMic,
-    toggleCamera,
+    localStream, remoteStreams, callActive, micOn, cameraOn,
+    error: webrtcError, startCall, endCall, toggleMic, toggleCamera,
   } = useWebRTC({ socket, roomId: id, user });
 
-  // Tracks whether a code change originated from socket (remote)
-  // Prevents echoing remote changes back to the server
   const isRemoteChange = useRef(false);
 
-  // ── Fetch room on mount ────────────────────────────────────
   useEffect(() => {
     const fetchRoom = async () => {
       try {
@@ -84,90 +436,56 @@ export default function Room() {
     fetchRoom();
   }, [id]);
 
-  // Show notification to join call when entering a room
   useEffect(() => {
     if (!loading && room && !callActive) {
-      const timer = setTimeout(() => {
-        if (!callActive) setShowCallToast(true);
-      }, 1500);
-
+      const timer = setTimeout(() => { if (!callActive) setShowCallToast(true); }, 1500);
       return () => clearTimeout(timer);
     }
   }, [loading, room, callActive]);
 
-  useEffect(() => {
-    if (callActive) {
-      setShowCallToast(false);
-    }
-  }, [callActive]);
+  useEffect(() => { if (callActive) setShowCallToast(false); }, [callActive]);
 
-  // ── Socket events ──────────────────────────────────────────
   useEffect(() => {
     if (!socket || !room) return;
-
     socket.emit('join-room', { roomId: id });
 
-    // Server sends full current state to this new joiner
     socket.on('room-state', ({ code: remoteCode, language: remoteLang }) => {
       isRemoteChange.current = true;
       setCode(remoteCode || getDefaultCode(remoteLang));
       setLanguage(remoteLang);
     });
-
-    // Full member list sent to new joiner
     socket.on('current-members', ({ members: m }) => {
       setMembers(m.map((x) => ({ id: x.userId, name: x.name })));
     });
-
-    // Someone else typed
     socket.on('code-update', ({ code: remoteCode }) => {
       isRemoteChange.current = true;
       setCode(remoteCode);
     });
-
-    // Someone changed language
     socket.on('language-update', ({ language: remoteLang }) => {
       setLanguage(remoteLang);
       isRemoteChange.current = true;
       setCode(getDefaultCode(remoteLang));
     });
-
-    // Someone joined
     socket.on('user-joined', ({ userId, name }) => {
       setMembers((prev) => {
         if (prev.find((m) => m.id === userId)) return prev;
         return [...prev, { id: userId, name }];
       });
     });
-
-    // Someone left
     socket.on('user-left', ({ userId }) => {
       setMembers((prev) => prev.filter((m) => m.id !== userId));
     });
-
-    // Version saved confirmation
     socket.on('version-saved', ({ savedBy, savedAt }) => {
-      setVersionMsg(`Version saved by ${savedBy} at ${new Date(savedAt).toLocaleTimeString()}`);
+      setVersionMsg(`Saved by ${savedBy} · ${new Date(savedAt).toLocaleTimeString()}`);
       setTimeout(() => setVersionMsg(''), 4000);
     });
-
-    // Execution result broadcast — everyone in room gets this
     socket.on('execution-output', (result) => {
       setExecutionResult(result);
       setExecuting(false);
       setOutputOpen(true);
     });
-
-    // NEW: Capture chat messages regardless of tab state
-    // socket.on('chat-message', (msg) => {
-    //   setPendingMessages((prev) => [...prev, msg]);
-    // });
-
-    // NEW: Capture generated questions regardless of panel state
     socket.on('question-update', ({ question }) => {
       setPendingQuestion(question);
-
-      // Auto-open question panel when a question arrives
       setQuestionOpen(true);
     });
 
@@ -180,23 +498,16 @@ export default function Room() {
       socket.off('user-left');
       socket.off('version-saved');
       socket.off('execution-output');
-      // socket.off('chat-message');
       socket.off('question-update');
-
     };
   }, [socket, room]);
 
-  // ── Editor change handler ──────────────────────────────────
   const handleCodeChange = useCallback((newCode) => {
-    if (isRemoteChange.current) {
-      isRemoteChange.current = false;
-      return;
-    }
+    if (isRemoteChange.current) { isRemoteChange.current = false; return; }
     setCode(newCode);
     socket?.emit('code-change', { roomId: id, code: newCode });
   }, [socket, id]);
 
-  // ── Language change ────────────────────────────────────────
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     const newCode = getDefaultCode(newLang);
@@ -206,30 +517,21 @@ export default function Room() {
     socket?.emit('code-change', { roomId: id, code: newCode });
   };
 
-  // ── Save version ───────────────────────────────────────────
   const handleSaveVersion = () => {
     socket?.emit('save-version', { roomId: id, code, language });
   };
 
-  // ── Run code ───────────────────────────────────────────────
   const handleRun = async () => {
     setExecuting(true);
     setExecutionResult(null);
     setOutputOpen(true);
-
     try {
       const res = await executionAPI.run({ code, language, stdin, roomId: id });
-
-      // Broadcast result to all room members via socket
-      socket?.emit('execution-result', {
-        roomId: id,
-        result: res.data,
-      });
+      socket?.emit('execution-result', { roomId: id, result: res.data });
     } catch (err) {
       const errorResult = {
-        isError: true,
-        status: 'Error',
-        stderr: err.response?.data?.message || 'Execution failed. Please try again.',
+        isError: true, status: 'Error',
+        stderr: err.response?.data?.message || 'Execution failed.',
         executedBy: user.name,
       };
       setExecutionResult(errorResult);
@@ -237,194 +539,199 @@ export default function Room() {
     }
   };
 
-  // ── Copy invite code ───────────────────────────────────────
   const handleCopyCode = () => {
     navigator.clipboard.writeText(room?.invite_code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ── Render guards ──────────────────────────────────────────
-  if (loading) return <div style={s.center}>Loading room...</div>;
-  if (error) return (
-    <div style={s.center}>
-      <p style={{ color: '#e74c3c', marginBottom: '1rem' }}>{error}</p>
-      <button style={s.btnSecondary} onClick={() => navigate('/dashboard')}>← Back</button>
-    </div>
+  if (loading) return (
+    <>
+      <style>{STYLES}</style>
+      <div className="room-center">
+        <div className="gold-dot" />
+        <p>Loading room</p>
+      </div>
+    </>
   );
+
+  if (error) return (
+    <>
+      <style>{STYLES}</style>
+      <div className="room-center">
+        <p style={{ color: '#f87171' }}>{error}</p>
+        <button className="btn-back" onClick={() => navigate('/dashboard')}>← Dashboard</button>
+      </div>
+    </>
+  );
+
   const isHost = room?.host_id === user?.id;
+
+  // Calculate editor width
+  const editorWidth = questionOpen && outputOpen ? '40%'
+    : questionOpen || outputOpen ? '55%'
+    : '100%';
+
   return (
-    <div style={s.page}>
+    <>
+      <style>{STYLES}</style>
+      <div className="room-root">
 
-      {/* ── Top bar ── */}
-      <header style={s.header}>
-        <div style={s.headerLeft}>
-          <button style={s.backBtn} onClick={() => navigate('/dashboard')}>←</button>
-          <span style={s.roomName}>{room?.name}</span>
-          <button style={s.inviteBtn} onClick={handleCopyCode}>
-            {copied ? 'Copied!' : `# ${room?.invite_code}`}
+        {/* HEADER */}
+        <header className="room-header">
+          <div className="header-left">
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>←</button>
+            <span className="room-name">{room?.name}</span>
+            <button className="invite-btn" onClick={handleCopyCode}>
+              {copied ? '✓ copied' : `# ${room?.invite_code}`}
+            </button>
+          </div>
+
+          <div className="header-center">
+            <span className="logo-text">CollabX</span>
+          </div>
+
+          <div className="header-right">
+            <div className="members-row">
+              {members.map((m, i) => (
+                <div key={i} className="member-badge" title={m.name}>
+                  {m.name[0].toUpperCase()}
+                </div>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        {/* TOOLBAR */}
+        <div className="room-toolbar">
+          <select className="lang-select" value={language} onChange={handleLanguageChange}>
+            {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
+
+          <div className="toolbar-divider" />
+
+          <button className="btn-save" onClick={handleSaveVersion}>Save Version</button>
+
+          <button
+            className="btn-run"
+            style={{ opacity: executing ? 0.65 : 1 }}
+            onClick={handleRun}
+            disabled={executing}
+          >
+            {executing ? '● Running' : '▶ Run'}
           </button>
+
+          <div className="toolbar-divider" />
+
+          <button
+            className={`btn-toggle ${outputOpen ? 'active' : ''}`}
+            onClick={() => setOutputOpen(!outputOpen)}
+          >
+            Output
+          </button>
+
+          <button
+            className={`btn-toggle ${questionOpen ? 'active' : ''}`}
+            onClick={() => setQuestionOpen(!questionOpen)}
+          >
+            ✦ AI Question
+          </button>
+
+          {versionMsg && <span className="version-msg">✓ {versionMsg}</span>}
         </div>
-        <div style={s.headerCenter}>
-          <span style={s.logo}>CollabX</span>
-        </div>
-        <div style={s.headerRight}>
-          <div style={s.membersRow}>
-            {members.map((m, i) => (
-              <div key={i} style={s.memberBadge} title={m.name}>
-                {m.name[0].toUpperCase()}
-              </div>
-            ))}
+
+        {/* MAIN */}
+        <div className="room-main">
+
+          {questionOpen && (
+            <div className="question-col">
+              <QuestionPanel
+                socket={socket}
+                roomId={id}
+                language={language}
+                isHost={isHost}
+                externalQuestion={pendingQuestion}
+              />
+            </div>
+          )}
+
+          <div className="editor-col" style={{ width: editorWidth }}>
+            <div className="editor-wrapper">
+              <Editor
+                height="100%"
+                language={monacoLang(language)}
+                value={code}
+                onChange={handleCodeChange}
+                theme="vs-dark"
+                options={{
+                  fontSize: 14,
+                  fontFamily: "'Space Mono', 'Fira Code', monospace",
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                  tabSize: 2,
+                  lineNumbers: 'on',
+                  renderLineHighlight: 'all',
+                  cursorBlinking: 'smooth',
+                  lineDecorationsWidth: 8,
+                  folding: true,
+                  bracketPairColorization: { enabled: true },
+                  padding: { top: 16, bottom: 16 },
+                }}
+              />
+            </div>
+            <StdinInput value={stdin} onChange={setStdin} />
           </div>
+
+          {outputOpen && (
+            <div className="output-col">
+              <OutputPanel result={executionResult} loading={executing} />
+            </div>
+          )}
+
+          <VideoPanel
+            localStream={localStream}
+            remoteStreams={remoteStreams}
+            callActive={callActive}
+            micOn={micOn}
+            cameraOn={cameraOn}
+            error={webrtcError}
+            onStartCall={startCall}
+            onEndCall={endCall}
+            onToggleMic={toggleMic}
+            onToggleCamera={toggleCamera}
+            userName={user?.name}
+            socket={socket}
+            roomId={id}
+            user={user}
+          />
         </div>
-      </header>
 
-      {/* ── Toolbar ── */}
-      <div style={s.toolbar}>
-        <select style={s.langSelect} value={language} onChange={handleLanguageChange}>
-          {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-        </select>
-
-        <button style={s.saveBtn} onClick={handleSaveVersion}>
-          Save Version
-        </button>
-
-        <button
-          style={{ ...s.runBtn, opacity: executing ? 0.7 : 1 }}
-          onClick={handleRun}
-          disabled={executing}
-        >
-          {executing ? 'Running...' : '▶ Run'}
-        </button>
-
-        <button style={s.outputToggle} onClick={() => setOutputOpen(!outputOpen)}>
-          {outputOpen ? 'Hide Output' : 'Show Output'}
-        </button>
-
-        <button
-          style={{
-            ...s.outputToggle,
-            borderColor: questionOpen ? '#a78bfa' : '#555',
-            color: questionOpen ? '#a78bfa' : '#9ca3af',
-          }}
-          onClick={() => setQuestionOpen(!questionOpen)}
-        >
-          {questionOpen ? 'Hide Question' : '🤖 AI Question'}
-        </button>
-
-        {versionMsg && <span style={s.versionMsg}>{versionMsg}</span>}
-      </div>
-
-      {/* ── Main area ── */}
-      <div style={s.mainArea}>
-
-        {questionOpen && (
-          <div style={s.questionCol}>
-            <QuestionPanel
-              socket={socket}
-              roomId={id}
-              language={language}
-              isHost={isHost}
-              externalQuestion={pendingQuestion}
-            />
-          </div>
+        {showCallToast && !callActive && (
+          <Toast
+            message="Your collaborator may be waiting! Enable your camera and microphone to start the video call."
+            actionLabel="Start Call"
+            onAction={() => { startCall(); setShowCallToast(false); }}
+            onClose={() => setShowCallToast(false)}
+            duration={10000}
+          />
         )}
-        {/* Editor + stdin */}
-        <div style={{
-          ...s.editorCol,
-          width: questionOpen && outputOpen ? '40%'
-            : questionOpen || outputOpen ? '55%'
-              : '100%'
-        }}>
-          <div style={s.editorWrapper}>
-            <Editor
-              height="100%"
-              language={monacoLang(language)}
-              value={code}
-              onChange={handleCodeChange}
-              theme="vs-dark"
-              options={{
-                fontSize: 14,
-                fontFamily: "'Fira Code', 'Consolas', monospace",
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                automaticLayout: true,
-                tabSize: 2,
-                lineNumbers: 'on',
-                renderLineHighlight: 'all',
-                cursorBlinking: 'smooth',
-              }}
-            />
-          </div>
-          <StdinInput value={stdin} onChange={setStdin} />
-        </div>
-
-        {/* Output panel */}
-        {outputOpen && (
-          <div style={s.outputCol}>
-            <OutputPanel result={executionResult} loading={executing} />
-          </div>
-        )}
-
-        {/* ✅ Video panel (NEW) */}
-        <VideoPanel
-          localStream={localStream}
-          remoteStreams={remoteStreams}
-          callActive={callActive}
-          micOn={micOn}
-          cameraOn={cameraOn}
-          error={webrtcError}
-          onStartCall={startCall}
-          onEndCall={endCall}
-          onToggleMic={toggleMic}
-          onToggleCamera={toggleCamera}
-          userName={user?.name}
-          socket={socket}
-          roomId={id}
-          user={user}
-        />
-
       </div>
-      {/* ── Call notification toast ── */}
-      {showCallToast && !callActive && (
-        <Toast
-          message="Your collaborator may be waiting! Enable your camera and microphone to start the video call."
-          actionLabel="Start Call"
-          onAction={() => {
-            startCall();
-            setShowCallToast(false);
-          }}
-          onClose={() => setShowCallToast(false)}
-          duration={10000}
-        />
-      )}
-    </div>
+    </>
   );
 }
 
-// Monaco language ID mapping
 function monacoLang(lang) {
   const map = {
-    javascript: 'javascript',
-    python: 'python',
-    typescript: 'typescript',
-    java: 'java',
-    cpp: 'cpp',
-    c: 'c',
-    go: 'go',
-    rust: 'rust',
-    csharp: 'csharp',
-    ruby: 'ruby',
-    php: 'php',
-    swift: 'swift',
-    kotlin: 'kotlin',
-    bash: 'shell',
+    javascript: 'javascript', python: 'python', typescript: 'typescript',
+    java: 'java', cpp: 'cpp', c: 'c', go: 'go', rust: 'rust',
+    csharp: 'csharp', ruby: 'ruby', php: 'php', swift: 'swift',
+    kotlin: 'kotlin', bash: 'shell',
   };
   return map[lang] || 'javascript';
 }
 
-// Default starter code per language
 function getDefaultCode(lang) {
   const defaults = {
     javascript: `// JavaScript\nconsole.log("Hello, CollabX!");`,
@@ -444,36 +751,3 @@ function getDefaultCode(lang) {
   };
   return defaults[lang] || '';
 }
-
-const s = {
-  page: { display: 'flex', flexDirection: 'column', height: '100vh', background: '#1e1e1e', fontFamily: 'sans-serif', overflow: 'hidden' },
-  center: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'sans-serif', color: '#ccc' },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1rem', height: '52px', background: '#2d2d2d', borderBottom: '1px solid #404040', flexShrink: 0 },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 },
-  headerCenter: { flex: 1, textAlign: 'center' },
-  headerRight: { flex: 1, display: 'flex', justifyContent: 'flex-end' },
-  logo: { color: '#a78bfa', fontWeight: '700', fontSize: '1.1rem', letterSpacing: '0.5px' },
-  backBtn: { background: 'transparent', border: 'none', color: '#ccc', fontSize: '1.2rem', cursor: 'pointer', padding: '0.2rem 0.5rem' },
-  roomName: { color: '#e2e8f0', fontWeight: '600', fontSize: '0.95rem' },
-  inviteBtn: { background: '#374151', border: 'none', color: '#9ca3af', borderRadius: '6px', padding: '0.25rem 0.7rem', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'monospace' },
-  membersRow: { display: 'flex', gap: '0.4rem' },
-  memberBadge: { width: 30, height: 30, borderRadius: '50%', background: '#6c63ff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: '600' },
-  toolbar: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1rem', background: '#252526', borderBottom: '1px solid #404040', flexShrink: 0 },
-  langSelect: { background: '#3c3c3c', color: '#ccc', border: '1px solid #555', borderRadius: '6px', padding: '0.3rem 0.6rem', fontSize: '0.85rem', cursor: 'pointer' },
-  saveBtn: { background: '#6c63ff', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.35rem 0.9rem', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '500' },
-  runBtn: { background: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.35rem 1rem', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '600' },
-  outputToggle: { background: 'transparent', border: '1px solid #555', color: '#9ca3af', borderRadius: '6px', padding: '0.35rem 0.8rem', fontSize: '0.82rem', cursor: 'pointer' },
-  versionMsg: { color: '#6ee7b7', fontSize: '0.82rem', marginLeft: '0.5rem' },
-  mainArea: { display: 'flex', flex: 1, overflow: 'hidden' },
-  editorCol: { display: 'flex', flexDirection: 'column', transition: 'width 0.2s', overflow: 'hidden' },
-  editorWrapper: { flex: 1, overflow: 'hidden' },
-  outputCol: { width: '40%', borderLeft: '1px solid #333', display: 'flex', flexDirection: 'column', overflow: 'hidden' },
-  btnSecondary: { padding: '0.5rem 1.2rem', border: '1px solid #6c63ff', borderRadius: '8px', background: 'transparent', color: '#6c63ff', cursor: 'pointer' }, questionCol: {
-    width: '280px',
-    flexShrink: 0,
-    borderRight: '1px solid #333',
-    overflowY: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-};
