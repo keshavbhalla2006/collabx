@@ -31,11 +31,11 @@ session: false → disables sessions (since you're using JWT)
 */
 router.get(
     '/google/callback', 
-    passport.authenticate('google',{failureRedirect: 'http://localhost:5173/login', session: false}),
+    passport.authenticate('google',{failureRedirect: 'https://collabx-2-e3qp.onrender.com/login', session: false}),
     (req,res)=> {
         const token = generateToken({id: req.user.id, email: req.user.email, name: req.user.name}); //This comes from passport google strategy, it contains the authenticated user
 
-        res.redirect(`http://localhost:5173/auth/callback?token=${token}`); //Sends user back to frontend, Token is passed in URL query
+        res.redirect(`https://collabx-2-e3qp.onrender.com/auth/callback?token=${token}`); //Sends user back to frontend, Token is passed in URL query
     }
 );
 
