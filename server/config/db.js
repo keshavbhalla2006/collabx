@@ -2,14 +2,21 @@ const { Sequelize } = require('sequelize'); //Sequelize → Main class used to c
 require('dotenv').config(); //dotenv → Loads environment variables from a .env file into process.env.
 
 const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-        host: process.env.DB_HOST, //host → Where your DB is hosted (usually localhost)
-        dialect: 'mysql', 
-        logging: false, //Disables SQL query logs in the console -> that means we will not see queries being executed in the console
-    }
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host:    process.env.DB_HOST,
+    port:    process.env.DB_PORT || 3306,
+    dialect: 'mysql',
+    logging: false,
+    dialectOptions: {
+      ssl: process.env.NODE_ENV === 'production' ? {
+        require: true,
+        rejectUnauthorized: false,
+      } : false,
+    },
+  }
 );
 
 module.exports = sequelize; //Makes this database connection available in other files

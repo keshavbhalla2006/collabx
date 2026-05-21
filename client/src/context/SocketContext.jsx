@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }) => {
     if (!token) return;
 
     // Create socket connection — pass JWT in auth handshake
-    socketRef.current = io('http://localhost:5000', {
+    socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
       auth: { token },          // this is what our server middleware reads //Sends JWT to backend
       transports: ['websocket'], // skip polling, go straight to WS //Direct WebSocket connection
     });

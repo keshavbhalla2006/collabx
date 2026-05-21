@@ -61,7 +61,7 @@ export default function Login() {
 
         <div style={styles.divider}><span>or</span></div>
 
-        <a href="http://localhost:5000/api/auth/google" style={styles.googleBtn}>
+        <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`}>
           Continue with Google
         </a>
 
