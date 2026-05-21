@@ -125,8 +125,8 @@ const STYLES = `
   .header-right{flex:1;display:flex;justify-content:flex-end;align-items:center;gap:0.5rem;}
   .back-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#8a9199;font-size:1rem;cursor:pointer;width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Space Mono',monospace;flex-shrink:0;}
   .back-btn:hover{border-color:rgba(212,175,55,0.4);color:#d4af37;}
-  .room-name{color:#e8ecf0;font-weight:700;font-size:0.82rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .invite-btn{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);color:#d4af37;border-radius:5px;padding:0.2rem 0.55rem;font-size:0.68rem;cursor:pointer;font-family:'Space Mono',monospace;letter-spacing:.05em;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+  .room-name{color:#e8ecf0;font-weight:700;font-size:0.82rem;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position: absolute;margin-left: 17.5rem;}
+  .invite-btn{background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.2);color:#d4af37;border-radius:5px;padding:0.1rem 0.3rem;font-size:0.68rem;cursor:pointer;font-family:'Space Mono',monospace;letter-spacing:.05em;transition:all .2s;white-space:nowrap;flex-shrink:0;margin-left: -5px;}
   .invite-btn:hover{background:rgba(212,175,55,0.12);}
   .logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.15em;text-transform:uppercase;background:linear-gradient(135deg,#d4af37,#f0d060,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .members-row{display:flex;gap:0.3rem;}
