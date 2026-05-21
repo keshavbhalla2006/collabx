@@ -28,7 +28,7 @@ const start = async () => { //Async function because DB connection is asynchrono
   // Attach Socket.IO to the HTTP server
   const io = new Server(httpServer, {
     cors: { //CORS is configured for frontend
-      origin: 'http://localhost:5173',
+      origin: ['http://localhost:5173','https://collabx-2-e3qp.onrender.com',],
       methods: ['GET', 'POST'],
       credentials: true,
     },
