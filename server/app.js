@@ -46,7 +46,10 @@ const executionLimiter = rateLimit({
 });
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+   origin: [
+    'http://localhost:5173',
+    'https://collabx-2-e3qp.onrender.com',  // add this
+  ],
   credentials: true,
 }));
 

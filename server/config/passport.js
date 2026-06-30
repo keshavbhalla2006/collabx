@@ -8,7 +8,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID, //identifies the app
             clientSecret: process.env.GOOGLE_CLIENT_SECRET, //secret key
-            callbackURL: process.env.GOOGLE_CLIENT_URL, //where google redirects after login
+            callbackURL: process.env.GOOGLE_CALLBACK_URL, //where google redirects after login
         },
 
         //accessToken → token to access Google APIs, refreshToken → used to refresh access, profile → user info from Google, done → callback to finish authentication
