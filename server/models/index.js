@@ -39,17 +39,23 @@ User.hasMany(RoomMember, { foreignKey: 'user_id' });
 RoomMember.belongsTo(User, { foreignKey: 'user_id' });
 
 //The following function is Databse Sync Function
-const syncDB = async()=>{ //connects to DB and creates/updates tables
-    try{
-        await sequelize.authenticate(); //This checks if MySQL connection works.
-        console.log('MySQL connected successfully.');
-        await sequelize.sync({ alter: true});// Creates tables if doesnt exist, updates schema if changed
-        //Here alter: true ---> Automatically modifies tables, Good for development, Not recommended in production (can cause data issues)
-        console.log('All tables synced');
-    }catch(err){
-        console.error('Database connection error.',err);
-        process.exit(1);
+const syncDB = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('MySQL connected successfully.');
+
+    // Use alter only in development, use safe sync in production
+    if (process.env.NODE_ENV === 'production') {
+      await sequelize.sync();  // only creates tables if they don't exist, never alters
+    } else {
+      await sequelize.sync({ alter: true });  // alter only locally
     }
+
+    console.log('All tables synced');
+  } catch (err) {
+    console.error('Database connection error.', err);
+    process.exit(1);
+  }
 };
 
 module.exports = {sequelize, syncDB, User, Room, Session, Version, Message, RoomMember};
